@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:google_nav_bar/google_nav_bar.dart';
+import 'package:vortex_gaming_emporium/pages/wallchat.dart';
 import 'bookingpage.dart';
 import 'homepage.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -17,6 +18,7 @@ class _MainPageState extends State<MainPage> {
   final List<Widget> _pages = [
     HomePage(),
     BookingPage(),
+    WallChat(),
     HistoryPage(),
   ];
   final zones = ["CommanZone","PrivateZone","GameStation"];
@@ -158,6 +160,11 @@ class _MainPageState extends State<MainPage> {
                 GButton(
                   icon: Icons.book,
                   text: 'Booking',
+                  backgroundColor: Colors.deepPurpleAccent,
+                ),
+                GButton(
+                  icon: Icons.chat,
+                  text: 'Chats',
                   backgroundColor: Colors.deepPurpleAccent,
                 ),
                 GButton(

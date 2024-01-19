@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:vortex_gaming_emporium/pages/wallchat.dart';
 import '../components/OpeningHours.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'bookingpage.dart';
@@ -16,7 +17,6 @@ class _HomePageState extends State<HomePage> {
   final currentuser = FirebaseAuth.instance.currentUser!;
 
   List<String> zones = ['Common Zone', 'Private Zone', 'Game Zone'];
-
   List<String> images = ['assets/images/common_zone.png', 'assets/images/private_room.png', 'assets/images/vrgame_room.png'];
   List<int> price = [15, 60, 150];
 
