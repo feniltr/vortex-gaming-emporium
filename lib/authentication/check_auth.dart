@@ -2,7 +2,6 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:vortex_gaming_emporium/main.dart';
 import 'package:vortex_gaming_emporium/pages/mainpage.dart';
-import '../pages/intropage.dart';
 import 'auth_page.dart';
 
 

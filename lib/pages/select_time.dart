@@ -86,19 +86,38 @@ class _select_TimeState extends State<select_Time> {
                       },
                       child: Container(
                         decoration: BoxDecoration(
-                          color: isSelected ? Colors.deepPurple : Colors.white,
+                          gradient: isSelected
+                              ? LinearGradient(
+                            begin: Alignment.topLeft,
+                            end: Alignment.bottomRight,
+                            colors: [Color(0xFF6600FF), Color(0xFFFF66FF)],
+                          )
+                              : null,
+                          color: isSelected ? null : Colors.white,
                           borderRadius: BorderRadius.circular(20),
                           border: Border.all(
-                            color: Colors.black,
+                            color: isSelected ? Colors.transparent : Colors.black,
                             width: 1,
                           ),
+                          boxShadow: [
+                            BoxShadow(
+                              color: isSelected ? Colors.black.withOpacity(0.3) : Colors.transparent,
+                              blurRadius: isSelected ? 10 : 0,
+                              offset: Offset(0, 5),
+                            ),
+                          ],
                         ),
                         alignment: Alignment.center,
-                        child: Text(
-                          timeslot[index],
+                        child: AnimatedDefaultTextStyle(
                           style: TextStyle(
                             color: isSelected ? Colors.white : Colors.black,
                             fontSize: 20,
+                            fontWeight: FontWeight.bold,
+                          ),
+                          duration: Duration(milliseconds: 200),
+                          curve: Curves.easeInOut,
+                          child: Text(
+                            timeslot[index],
                           ),
                         ),
                       ),
@@ -203,10 +222,10 @@ class _select_TimeState extends State<select_Time> {
     if (earliestSelectedTime.hour > currentTime.hour ||
         (earliestSelectedTime.hour == currentTime.hour && earliestSelectedTime.minute > currentTime.minute)) {
       validTime = true;
-      return true; // The selected time is valid
+      return true;
     } else {
       validTime = false;
-      return false; // The selected time is not valid
+      return false;
     }
   }
 

@@ -68,23 +68,38 @@ class _Select_time_gameroomState extends State<Select_time_gameroom> {
                         ? GestureDetector(
                       onTap: () {
                         setState(() {
+                          isSelected = !isSelected; // Toggle selection
                           if (isSelected) {
-                            selectedIndices.remove(index);
-                          } else {
                             selectedIndices.add(index);
+                          } else {
+                            selectedIndices.remove(index);
                           }
+                          selectedtime = selectedIndices.map((i) => timeslot[i]).toList();
+                          print("Selected Time: $selectedtime");
                         });
-                        selectedtime = selectedIndices.map((i) => timeslot[i]).toList();
-                        print("Selected Time: $selectedtime");
                       },
                       child: Container(
                         decoration: BoxDecoration(
-                          color: isSelected ? Colors.deepPurple : Colors.white,
+                          gradient: isSelected
+                              ? LinearGradient(
+                            begin: Alignment.topLeft,
+                            end: Alignment.bottomRight,
+                            colors: [Color(0xFF6600FF), Color(0xFFFF66FF)],
+                          )
+                              : null,
+                          color: isSelected ? null : Colors.white,
                           borderRadius: BorderRadius.circular(20),
                           border: Border.all(
                             color: Colors.black,
                             width: 1,
                           ),
+                          boxShadow: [
+                            BoxShadow(
+                              color: isSelected ? Colors.black.withOpacity(0.3) : Colors.transparent,
+                              blurRadius: isSelected ? 10 : 0,
+                              offset: Offset(0, 5),
+                            ),
+                          ],
                         ),
                         alignment: Alignment.center,
                         child: Text(
@@ -92,10 +107,12 @@ class _Select_time_gameroomState extends State<Select_time_gameroom> {
                           style: TextStyle(
                             color: isSelected ? Colors.white : Colors.black,
                             fontSize: 20,
+                            fontWeight: FontWeight.bold,
                           ),
                         ),
                       ),
                     )
+
                         : GestureDetector(
                       onTap: (){
                         CherryToast(

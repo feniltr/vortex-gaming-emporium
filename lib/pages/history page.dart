@@ -4,7 +4,6 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:lottie/lottie.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:vortex_gaming_emporium/components/loading.dart';
-
 import '../components/empty.dart';
 
 
@@ -30,7 +29,6 @@ class _HistoryPageState extends State<HistoryPage> {
     fetchData(_currentUser!.email!); // Use current user's email ID
   }
 
-  // Function to fetch data from Firestore based on the current user's email ID
   Future<void> fetchData(String emailId) async {
     await fetchCollectionData('CommanZone', emailId);
     await fetchCollectionData('PrivateZone', emailId);

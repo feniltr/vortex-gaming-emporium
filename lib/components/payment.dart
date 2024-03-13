@@ -28,6 +28,15 @@ class _PaymentState extends State<Payment> {
       'TimeSlot': widget.timslot,
       'total': widget.total
     });
+
+    FirebaseFirestore.instance.collection("Transactions").add({
+      'zone' : widget.zone,
+      'Email': widget.email,
+      'ZoneId': widget.zonid,
+      'TimeSlot': widget.timslot,
+      'total': widget.total,
+      'timestamp': FieldValue.serverTimestamp(),
+    });
     print("Sended data");
   }
 

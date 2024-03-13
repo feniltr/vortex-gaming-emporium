@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 
 class OpeningHoursContainer extends StatefulWidget {
   @override
@@ -6,9 +7,9 @@ class OpeningHoursContainer extends StatefulWidget {
 }
 
 class _OpeningHoursContainerState extends State<OpeningHoursContainer> {
-  final String openTime = "9:00 AM";
-
-  final String closeTime = "7:00 PM";
+  String openTime = "Loading";
+  String closeTime = "Loading";
+  String status = "Loading";
 
   String getCurrentStatus() {
     DateTime currentTime = DateTime.now();
@@ -20,15 +21,44 @@ class _OpeningHoursContainerState extends State<OpeningHoursContainer> {
     } else {
       return "Closed";
     }
-    setState(() {
+  }
 
-    });
+  void fetchDataFromFirebase() async {
+    try {
+      QuerySnapshot querySnapshot =
+      await FirebaseFirestore.instance.collection('OpenHourTime').get();
+
+      if (querySnapshot.docs.isNotEmpty) {
+        Map<String, dynamic> data =
+        querySnapshot.docs.first.data() as Map<String, dynamic>;
+
+        setState(() {
+          openTime = data['opentime'] ?? "";
+          closeTime = data['closetime'] ?? "";
+          status = data['status'] ?? "";
+        });
+
+        print("Open Time: $openTime");
+        print("Close Time: $closeTime");
+        print("Status Time: $status");
+      } else {
+        print("No documents found in the collection.");
+      }
+    } catch (e) {
+      print("Error fetching data: $e");
+    }
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    // Call the function to fetch data from Firebase when the widget is initialized
+    fetchDataFromFirebase();
+    getCurrentStatus();
   }
 
   @override
   Widget build(BuildContext context) {
-    String status = getCurrentStatus();
-
     final double paddingVertical = MediaQuery.of(context).size.height * 0.023;
     final double paddingHorizontal = MediaQuery.of(context).size.width * 0.23;
     final double fontSizeOpenTime = MediaQuery.of(context).size.width * 0.05;
@@ -78,5 +108,3 @@ class _OpeningHoursContainerState extends State<OpeningHoursContainer> {
     );
   }
 }
-
-
