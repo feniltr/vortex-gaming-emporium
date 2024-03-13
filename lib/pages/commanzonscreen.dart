@@ -7,7 +7,6 @@ import 'package:vortex_gaming_emporium/components/loading.dart';
 import 'package:vortex_gaming_emporium/pages/reciept.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:cherry_toast/cherry_toast.dart';
-
 import '../components/payment.dart';
 
 
@@ -27,14 +26,17 @@ class _CommonZoneScreenState extends State<CommonZoneScreen> {
   int? total;
   bool isLoading = true;
   final currentuser = FirebaseAuth.instance.currentUser!;
+  late String computers = '';
 
   @override
   void initState(){
     super.initState();
-    print("");
-    // Fetch data and populate the computerList only once when the widget is initialized
+
+    fetchDataFromFirestore();
+
+
     FirebaseFirestore.instance
-        .collection('CommanZone') // replace with your actual collection name
+        .collection('CommanZone')
         .where('TimeSlot', arrayContainsAny: widget.t)
         .get()
         .then((QuerySnapshot snapshot) {
@@ -44,7 +46,21 @@ class _CommonZoneScreenState extends State<CommonZoneScreen> {
           computerList.addAll(data['ZoneId']);
         }
       }
-      setState(() {isLoading = false;}); // Call setState to trigger a rebuild after data is fetched
+      setState(() {isLoading = false;});
+    });
+  }
+
+  void fetchDataFromFirestore() async {
+    FirebaseFirestore.instance.collection('unit').doc('id').get().then((documentSnapshot) {
+      if (documentSnapshot.exists) {
+        Map<String, dynamic> data = documentSnapshot.data() as Map<String, dynamic>;
+        computers = data['computers'] ?? '';
+        print('Computer Name: $computers');
+      } else {
+        print('Document does not exist');
+      }
+    }).catchError((error) {
+      print('Error fetching document: $error');
     });
   }
 
@@ -62,7 +78,6 @@ class _CommonZoneScreenState extends State<CommonZoneScreen> {
 
   void book(){
     if(selectedComputers.isEmpty){
-     // Fluttertoast.showToast(msg: "Select Computer");
       CherryToast(
         icon: Icons.report_problem_outlined,
         themeColor: Colors.red,
@@ -175,6 +190,14 @@ class _CommonZoneScreenState extends State<CommonZoneScreen> {
     });
     print("Sended data");
 
+    FirebaseFirestore.instance.collection("transactions").add({
+      'zone' : "commanzone",
+      'Email' : currentuser.email!,
+      'ZoneId' : selectedComputers,
+      'TimeSlot' : widget.t,
+      'total' : total,
+    });
+
     //send data to receipt
     Navigator.push(context,MaterialPageRoute(builder: (context) =>
         Receipt(
@@ -215,7 +238,7 @@ class _CommonZoneScreenState extends State<CommonZoneScreen> {
               gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
                 crossAxisCount: 3,
               ),
-              itemCount: 20,
+              itemCount: int.parse(computers),
               itemBuilder: (context, index) {
                 final pc = (index + 1);
                 final isSelected = selectedComputers.contains(pc);
@@ -243,15 +266,38 @@ class _CommonZoneScreenState extends State<CommonZoneScreen> {
                       },
                       child: Container(
                         decoration: BoxDecoration(
-                          color: isSelected ? Colors.deepPurple : Colors.white,
-                          border: Border.all(color: Colors.black),
+                          gradient: isSelected
+                              ? LinearGradient(
+                            begin: Alignment.topLeft,
+                            end: Alignment.bottomRight,
+                            colors: [Color(0xFF6600FF), Color(0xFFFF66FF)],
+                          )
+                              : null,
+                          color: isSelected ? null : Colors.white,
+                          border: Border.all(
+                            color: Colors.black,
+                          ),
                           borderRadius: BorderRadius.circular(8),
+                          boxShadow: [
+                            BoxShadow(
+                              color: isSelected ? Colors.black.withOpacity(0.3) : Colors.transparent,
+                              blurRadius: isSelected ? 10 : 0,
+                              offset: Offset(0, 5),
+                            ),
+                          ],
                         ),
                         child: Center(
-                          child: Text('Computer ${index + 1}',style: TextStyle(color: isSelected ? Colors.white:Colors.black),),
+                          child: Text(
+                            'Computer ${index + 1}',
+                            style: TextStyle(
+                              color: isSelected ? Colors.white : Colors.black,
+                              fontSize: 16, // Adjust font size as needed
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
                         ),
                       ),
-                    ),
+                    )
                   );
                 }
               },

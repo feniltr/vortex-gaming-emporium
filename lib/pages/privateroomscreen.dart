@@ -24,11 +24,13 @@ class _PrivateRoomScreenState extends State<PrivateRoomScreen> {
   bool isLoading = true;
   int ?total;
   final currentuser = FirebaseAuth.instance.currentUser!;
+  late String rooms = "";
 
   @override
   void initState() {
     super.initState();
-    // Initialize the list of rooms
+
+      fetchDataFromFirestore();
 
       FirebaseFirestore.instance
           .collection('PrivateZone') // replace with your actual collection name
@@ -47,6 +49,19 @@ class _PrivateRoomScreenState extends State<PrivateRoomScreen> {
       });
     }
 
+  void fetchDataFromFirestore() async {
+    FirebaseFirestore.instance.collection('unit').doc('id').get().then((documentSnapshot) {
+      if (documentSnapshot.exists) {
+        Map<String, dynamic> data = documentSnapshot.data() as Map<String, dynamic>;
+        rooms = data['rooms'] ?? '';
+        print('rooms : $rooms');
+      } else {
+        print('Document does not exist');
+      }
+    }).catchError((error) {
+      print('Error fetching document: $error');
+    });
+  }
 
   void toggleSelectedComputer(int pc) {
     setState(() {
@@ -210,7 +225,7 @@ class _PrivateRoomScreenState extends State<PrivateRoomScreen> {
               gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
                 crossAxisCount: 3,
               ),
-              itemCount: 10,
+              itemCount: int.parse(rooms),
               itemBuilder: (context, index) {
                 final pc = (index + 1);
                 final isSelected = selectedRooms.contains(pc);
@@ -238,15 +253,38 @@ class _PrivateRoomScreenState extends State<PrivateRoomScreen> {
                       },
                       child: Container(
                         decoration: BoxDecoration(
-                          color: isSelected ? Colors.deepPurple : Colors.white,
-                          border: Border.all(color: Colors.black),
+                          gradient: isSelected
+                              ? LinearGradient(
+                            begin: Alignment.topLeft,
+                            end: Alignment.bottomRight,
+                            colors: [Color(0xFF6600FF), Color(0xFFFF66FF)],
+                          )
+                              : null,
+                          color: isSelected ? null : Colors.white,
+                          border: Border.all(
+                            color: Colors.black,
+                          ),
                           borderRadius: BorderRadius.circular(8),
+                          boxShadow: [
+                            BoxShadow(
+                              color: isSelected ? Colors.black.withOpacity(0.3) : Colors.transparent,
+                              blurRadius: isSelected ? 10 : 0,
+                              offset: Offset(0, 5),
+                            ),
+                          ],
                         ),
                         child: Center(
-                          child: Text('Room ${index + 1}',style: TextStyle(color: isSelected ? Colors.white:Colors.black),),
+                          child: Text(
+                            'Room ${index + 1}',
+                            style: TextStyle(
+                              color: isSelected ? Colors.white : Colors.black,
+                              fontSize: 16, // Adjust font size as needed
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
                         ),
                       ),
-                    ),
+                    )
                   );
                 }
               },

@@ -25,12 +25,15 @@ class _GameRoomScreenState extends State<GameRoomScreen> {
   bool isLoading = true;
   int ?total;
   final currentuser = FirebaseAuth.instance.currentUser!;
+  late String gamerooms = "";
 
 
   @override
 
   void initState() {
     super.initState();
+
+    fetchDataFromFirestore();
     // Initialize the list of game stations
     FirebaseFirestore.instance
         .collection('GameStation') // replace with your actual collection name
@@ -46,6 +49,20 @@ class _GameRoomScreenState extends State<GameRoomScreen> {
       }
       print("Selected Time private:${widget.timeSlot}");
       setState(() { isLoading = false;}); // Call setState to trigger a rebuild after data is fetched
+    });
+  }
+
+  void fetchDataFromFirestore() async {
+    FirebaseFirestore.instance.collection('unit').doc('id').get().then((documentSnapshot) {
+      if (documentSnapshot.exists) {
+        Map<String, dynamic> data = documentSnapshot.data() as Map<String, dynamic>;
+        gamerooms = data['gameroom'] ?? '';
+        print('gamerooms : $gamerooms');
+      } else {
+        print('Document does not exist');
+      }
+    }).catchError((error) {
+      print('Error fetching document: $error');
     });
   }
 
@@ -166,11 +183,21 @@ class _GameRoomScreenState extends State<GameRoomScreen> {
   }
 
   void send_data(){
+
     FirebaseFirestore.instance.collection("GameStation").add({
       'Email' : currentuser.email!,
       'ZoneId' : selectedStations,
       'TimeSlot' : widget.timeSlot,
       'total' : total
+    });
+
+    FirebaseFirestore.instance.collection("Transactions").add({
+      'zone' : "gamestation",
+      'Email' : currentuser.email!,
+      'ZoneId' : selectedStations,
+      'TimeSlot' : widget.timeSlot,
+      'total' : total,
+      'timestamp': FieldValue.serverTimestamp(),
     });
 
     //send data to receipt
@@ -211,7 +238,7 @@ class _GameRoomScreenState extends State<GameRoomScreen> {
               gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
                 crossAxisCount: 3,
               ),
-              itemCount: 10,
+              itemCount: int.parse(gamerooms),
               itemBuilder: (context, index) {
                 final pc = (index + 1);
                 final isSelected = selectedStations.contains(pc);
@@ -239,15 +266,39 @@ class _GameRoomScreenState extends State<GameRoomScreen> {
                       },
                       child: Container(
                         decoration: BoxDecoration(
-                          color: isSelected ? Colors.deepPurple : Colors.white,
-                          border: Border.all(color: Colors.black),
+                          gradient: isSelected
+                              ? LinearGradient(
+                            begin: Alignment.topLeft,
+                            end: Alignment.bottomRight,
+                            colors: [Color(0xFF6600FF), Color(0xFFFF66FF)],
+                          )
+                              : null,
+                          color: isSelected ? null : Colors.white,
+                          border: Border.all(
+                            color: Colors.black,
+                          ),
                           borderRadius: BorderRadius.circular(8),
+                          boxShadow: [
+                            BoxShadow(
+                              color: isSelected ? Colors.black.withOpacity(0.3) : Colors.transparent,
+                              blurRadius: isSelected ? 10 : 0,
+                              offset: Offset(0, 5),
+                            ),
+                          ],
                         ),
                         child: Center(
-                          child: Text('Station ${index + 1}',style: TextStyle(color: isSelected ? Colors.white:Colors.black),),
+                          child: Text(
+                            'Station ${index + 1}',
+                            style: TextStyle(
+                              color: isSelected ? Colors.white : Colors.black,
+                              fontSize: 16, // Adjust font size as needed
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
                         ),
                       ),
-                    ),
+                    )
+
                   );
                 }
               },

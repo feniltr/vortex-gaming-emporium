@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:google_nav_bar/google_nav_bar.dart';
+import 'package:url_launcher/url_launcher.dart';
 import 'package:vortex_gaming_emporium/pages/wallchat.dart';
+import 'MyProfile.dart';
 import 'bookingpage.dart';
+import 'drawer.dart';
 import 'homepage.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'history page.dart';
@@ -21,6 +24,7 @@ class _MainPageState extends State<MainPage> {
     WallChat(),
     HistoryPage(),
   ];
+
   final zones = ["CommanZone","PrivateZone","GameStation"];
 
   @override
@@ -90,6 +94,24 @@ class _MainPageState extends State<MainPage> {
     return TimeOfDay(hour: hours, minute: minutes);
   }
 
+  void onprofile(){
+    Navigator.push(context, MaterialPageRoute(
+      builder: (context) => MyProfile(),));
+  }
+
+  void signOut(){
+    FirebaseAuth.instance.signOut();
+  }
+
+  _launchDialer(String phoneNumber) async {
+    final url = 'tel:$phoneNumber';
+    try {
+      await launch(url);
+    } catch (e) {
+      print('Error launching dialer: $e');
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -136,6 +158,10 @@ class _MainPageState extends State<MainPage> {
             }, icon: Icon(Icons.logout,color: Colors.black,)),
         ],
       ),
+      drawer: MyDrawer(
+        onlogouttap: signOut,
+        onprofiletap: onprofile,
+      ),
       body: _pages[_currentIndex],
       bottomNavigationBar: Container(
         decoration: BoxDecoration(color: Colors.white, boxShadow: [
@@ -167,11 +193,14 @@ class _MainPageState extends State<MainPage> {
                   text: 'Chats',
                   backgroundColor: Colors.deepPurpleAccent,
                 ),
+
+
                 GButton(
                   icon: Icons.history,
                   text: 'History',
                   backgroundColor: Colors.deepPurpleAccent,
                 ),
+
               ],
               selectedIndex: _currentIndex,
               onTabChange: (index) {
